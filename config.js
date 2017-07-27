@@ -4,6 +4,8 @@ require.config({
     paths: {
         // Note that .js extension is not specified, it is applied automatically
         'geotoolkit': 'GeoToolkit-JS/bin/geotoolkit.adv',
+        'geotoolkit.data': 'GeoToolkit-JS/bin/geotoolkit.data.adv',
+        'geotoolkit.controls': 'GeoToolkit-JS/bin/geotoolkit.controls.adv',
         'jquery': 'GeoToolkit-JS/3rdparty/js/jquery.min',
     },
     // Browser independent configuration of the dependencies, exports, and custom init

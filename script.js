@@ -1,10 +1,22 @@
 // First parameter for define is an array with alias names for dependencies,
 // or actual paths to javascript filed which should be loaded before the
 // body of the module is executed
-define(["jquery", "geotoolkit"], function(){
+define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], function(){
     var initialize = function() {
         // initialization function of the module
         console.log('initialized');
+
+        // Create a group to hold nodes
+        var rootGroup = new geotoolkit.scene.Group();
+
+        // Get the canvas as a DOM object
+        var canvas = document.getElementById("tutorial-canvas");
+
+        // populate the plot
+        var plot = new geotoolkit.plot.Plot({
+            'canvasElement' : canvas,
+            'root' : rootGroup
+        });
 
         var tickAxis = new geotoolkit.axis.AdaptiveTickGenerator();
         var boundsAxis = new geotoolkit.util.Rect(10, 0, 50, 400);
@@ -26,22 +38,22 @@ define(["jquery", "geotoolkit"], function(){
         var boundsGrid = new geotoolkit.util.Rect(60, 0, 300, 400);
         var grid = new geotoolkit.axis.Grid(hTickGrid, vTickGrid);
 
-        // Create a group to hold nodes
-        var rootGroup = new geotoolkit.scene.Group();
+        var crossHairSettings = {
+            'vertical': new geotoolkit.attributes.LineStyle(),
+            'horizontal': new geotoolkit.attributes.LineStyle(),
+            'group': rootGroup
+        };
+        var crossHair = new geotoolkit.controls.tools.CrossHair(crossHairSettings);
+        crossHair.setEnabled(true);
 
         // Add the shape to the group
         rootGroup.addChild(line);
         rootGroup.addChild(axis);
         rootGroup.addChild(grid);
+        
+        new geotoolkit.controls.tools.ToolsContainer(plot).add(crossHair);
 
-        // Get the canvas as a DOM object
-        var canvas = document.getElementById("tutorial-canvas");
-
-        // Create a new Plot object from the canvas and group
-        return new geotoolkit.plot.Plot({
-            'canvasElement' : canvas,
-            'root' : rootGroup
-        });
+        return plot;
     }
 
     ///////////////////////////////////////////////////////////////
