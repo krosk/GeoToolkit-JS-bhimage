@@ -6,10 +6,14 @@ define(["jquery", "geotoolkit"], function(){
         // initialization function of the module
         console.log('initialized');
 
+        var axis = new geotoolkit.axis.Axis(new geotoolkit.axis.AdaptiveTickGenerator())
+                .setBounds(new geotoolkit.util.Rect(10, 10, 50, 400))
+                .setModelLimits(new geotoolkit.util.Rect(0, 0, 400, 400));
+
         // Create a shape and define its properties
         var line = new geotoolkit.scene.shapes.Line({
             'from' : new geotoolkit.util.Point(0, 0),
-            'to' : new geotoolkit.util.Point(200, 200),
+            'to' : new geotoolkit.util.Point(400, 400),
             'linestyle' : new geotoolkit.attributes.LineStyle()
         }); 
 
@@ -18,6 +22,7 @@ define(["jquery", "geotoolkit"], function(){
 
         // Add the shape to the group
         group.addChild(line);
+        group.addChild(axis);
 
         // Get the canvas as a DOM object
         var canvas = document.getElementById("tutorial-canvas");
