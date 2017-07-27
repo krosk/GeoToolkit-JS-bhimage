@@ -21,7 +21,7 @@ define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], funct
         // axis example
         var tickAxis = new geotoolkit.axis.AdaptiveTickGenerator();
         var boundsAxis = new geotoolkit.util.Rect(10, 0, 50, 400);
-        var modelLimits = new geotoolkit.util.Rect(0, 0, 400, 400);
+        var modelLimits = new geotoolkit.util.Rect(0, 0, 600, 600);
         var axis = new geotoolkit.axis.Axis(tickAxis)
                 .setBounds(boundsAxis)
                 .setModelLimits(modelLimits)
@@ -30,14 +30,14 @@ define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], funct
         // line example
         var line = new geotoolkit.scene.shapes.Line({
             'from' : new geotoolkit.util.Point(0, 0),
-            'to' : new geotoolkit.util.Point(400, 400),
+            'to' : new geotoolkit.util.Point(600, 600),
             'linestyle' : new geotoolkit.attributes.LineStyle()
         });
 
         // grid example
         var hTickGrid = new geotoolkit.axis.AdaptiveTickGenerator();
         var vTickGrid = new geotoolkit.axis.AdaptiveTickGenerator();
-        var boundsGrid = new geotoolkit.util.Rect(60, 0, 300, 400);
+        var boundsGrid = new geotoolkit.util.Rect(0, 0, 600, 600);
         var grid = new geotoolkit.axis.Grid(hTickGrid, vTickGrid);
 
         // crosshair example
@@ -47,19 +47,46 @@ define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], funct
             'group': rootGroup
         };
         var crossHair = new geotoolkit.controls.tools.CrossHair(crossHairSettings);
-        crossHair.setEnabled(true);
+        crossHair.setEnabled(false);
 
-        
+        // panning example
+        var panning = new geotoolkit.controls.tools.Panning()
+            .setEnabled(true)
+            .addListener(geotoolkit.controls.tools.Panning.Events.onPanning, function (sender, eventArgs) {
+                var diff = eventArgs.getDirection();
+                console.log(diff);
+            }.bind(this));
 
         // Add the shape to the group
         rootGroup.addChild(line);
         rootGroup.addChild(axis);
         rootGroup.addChild(grid);
 
-        new geotoolkit.controls.tools.ToolsContainer(plot).add(crossHair);
+        new geotoolkit.controls.tools.ToolsContainer(plot)
+            .add(crossHair)
+            .add(panning);
 
         return plot;
     }
+
+    /*
+    function CreatePanning() {
+        var panningAnnotated = createAnnotatedNode();
+        var panning = new geotoolkit.controls.tools.Panning()
+            .setEnabled(true)
+            .addListener(geotoolkit.controls.tools.Panning.Events.onPanning, function (sender, eventArgs) {
+                var diff = eventArgs.getDirection();
+                panningAnnotated.translateModel(diff.x, diff.y);
+            }.bind(this));
+
+        var plot = addShapeToCanvas('PanningCanvas', panningAnnotated);
+        new geotoolkit.controls.tools.ToolsContainer(plot)
+            .add(
+                new geotoolkit.controls.tools.CompositeTool(panningAnnotated.getModel(),"compositeNode")
+                    .add(panning)
+            );
+    }
+        */
 
     ///////////////////////////////////////////////////////////////
     // Module body
