@@ -18,6 +18,7 @@ define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], funct
             'root' : rootGroup
         });
 
+        // axis example
         var tickAxis = new geotoolkit.axis.AdaptiveTickGenerator();
         var boundsAxis = new geotoolkit.util.Rect(10, 0, 50, 400);
         var modelLimits = new geotoolkit.util.Rect(0, 0, 400, 400);
@@ -26,18 +27,20 @@ define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], funct
                 .setModelLimits(modelLimits)
                 .setAutoLabelRotation(true);
 
-        // Create a shape and define its properties
+        // line example
         var line = new geotoolkit.scene.shapes.Line({
             'from' : new geotoolkit.util.Point(0, 0),
             'to' : new geotoolkit.util.Point(400, 400),
             'linestyle' : new geotoolkit.attributes.LineStyle()
         });
 
+        // grid example
         var hTickGrid = new geotoolkit.axis.AdaptiveTickGenerator();
         var vTickGrid = new geotoolkit.axis.AdaptiveTickGenerator();
         var boundsGrid = new geotoolkit.util.Rect(60, 0, 300, 400);
         var grid = new geotoolkit.axis.Grid(hTickGrid, vTickGrid);
 
+        // crosshair example
         var crossHairSettings = {
             'vertical': new geotoolkit.attributes.LineStyle(),
             'horizontal': new geotoolkit.attributes.LineStyle(),
@@ -46,11 +49,13 @@ define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], funct
         var crossHair = new geotoolkit.controls.tools.CrossHair(crossHairSettings);
         crossHair.setEnabled(true);
 
+        
+
         // Add the shape to the group
         rootGroup.addChild(line);
         rootGroup.addChild(axis);
         rootGroup.addChild(grid);
-        
+
         new geotoolkit.controls.tools.ToolsContainer(plot).add(crossHair);
 
         return plot;
