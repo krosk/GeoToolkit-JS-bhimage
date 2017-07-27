@@ -1,0 +1,21 @@
+<html lang="en">
+<head>
+    <title>Title</title>
+    <script src="GeoToolkit-JS/3rdparty/js/require.js"></script>
+    <script src="config.js"></script>
+    <script>
+    function bodyLoadHandler() {
+        // Use require to load script.js. The object which the script returns
+        // will be passed to your callback function
+        require(['script'], function(App) {
+            // Call initialize function which we created in script.js
+            App.initialize();
+        });
+    }
+    </script>
+</head>
+<body onload="bodyLoadHandler()">
+    <canvas id="tutorial-canvas"></canvas>
+    hello testing
+</body>
+</html>
