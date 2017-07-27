@@ -6,23 +6,33 @@ define(["jquery", "geotoolkit"], function(){
         // initialization function of the module
         console.log('initialized');
 
-        var axis = new geotoolkit.axis.Axis(new geotoolkit.axis.AdaptiveTickGenerator())
-                .setBounds(new geotoolkit.util.Rect(10, 10, 50, 400))
-                .setModelLimits(new geotoolkit.util.Rect(0, 0, 400, 400));
+        var tickAxis = new geotoolkit.axis.AdaptiveTickGenerator();
+        var boundsAxis = new geotoolkit.util.Rect(10, 0, 50, 400);
+        var modelLimits = new geotoolkit.util.Rect(0, 0, 400, 400);
+        var axis = new geotoolkit.axis.Axis(tickAxis)
+                .setBounds(boundsAxis)
+                .setModelLimits(modelLimits)
+                .setAutoLabelRotation(true);
 
         // Create a shape and define its properties
         var line = new geotoolkit.scene.shapes.Line({
             'from' : new geotoolkit.util.Point(0, 0),
             'to' : new geotoolkit.util.Point(400, 400),
             'linestyle' : new geotoolkit.attributes.LineStyle()
-        }); 
+        });
+
+        var hTickGrid = new geotoolkit.axis.AdaptiveTickGenerator();
+        var vTickGrid = new geotoolkit.axis.AdaptiveTickGenerator();
+        var boundsGrid = new geotoolkit.util.Rect(60, 0, 300, 400);
+        var grid = new geotoolkit.axis.Grid(hTickGrid, vTickGrid);
 
         // Create a group to hold nodes
-        var group = new geotoolkit.scene.Group();
+        var rootGroup = new geotoolkit.scene.Group();
 
         // Add the shape to the group
-        group.addChild(line);
-        group.addChild(axis);
+        rootGroup.addChild(line);
+        rootGroup.addChild(axis);
+        rootGroup.addChild(grid);
 
         // Get the canvas as a DOM object
         var canvas = document.getElementById("tutorial-canvas");
@@ -30,7 +40,7 @@ define(["jquery", "geotoolkit"], function(){
         // Create a new Plot object from the canvas and group
         return new geotoolkit.plot.Plot({
             'canvasElement' : canvas,
-            'root' : group
+            'root' : rootGroup
         });
     }
 
