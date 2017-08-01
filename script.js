@@ -177,13 +177,109 @@ define(["jquery",
         var maxDepth = 2000;
 
         var widget = new geotoolkit.welllog.widgets.WellLogWidget()
-            .setLayoutStyle({'left': '0', 'top': '0', 'right': '0', 'bottom': '0'});
+            .setLayoutStyle({'left': '0', 'top': '0', 'right': '0', 'bottom': '0'})
+            .setOrientation(geotoolkit.util.Orientation.Vertical);
         widget.addTrack(geotoolkit.welllog.widgets.TrackType.IndexTrack);
-        widget.addTrack(geotoolkit.welllog.widgets.TrackType.LinearTrack);
+
+        var imageData = buildLog2DVisualData();
+        var log2DVisual = buildLog2DVisualComponent(imageData, 'my image');
+        widget.addTrack(geotoolkit.welllog.widgets.TrackType.LinearTrack)
+            .addChild(log2DVisual);
         widget.setBounds(new geotoolkit.util.Rect(topLeftX, topLeftY, widgetWidth, widgetHeight));
         widget.setDepthLimits(minDepth, maxDepth);
 
         return widget;
+    }
+
+    var buildLog2DVisualData = function()
+    {
+        var BHIMAGEDATA = (function()
+        {
+            var public = {};
+            var m_dataWidth = 36;
+            var m_dataHeight = 1000;
+            var m_depthData = [];
+            var m_imageData = [];
+            
+            public.initialize = function()
+            {
+                var lastDepth = 1000;
+                for ( var i = 0; i < m_dataHeight; i++ )
+                {
+                    for ( var j = 0; j < m_dataWidth; j++ )
+                    {
+                        m_imageData.push( Math.random() );
+                    }
+                    m_depthData.push( lastDepth );
+                    lastDepth += 1 + Math.random();
+                }
+            }
+            
+            public.dataWidth = function()
+            {
+                return m_dataWidth;
+            }
+            public.dataHeight = function()
+            {
+                return m_dataHeight;
+            }
+            public.imageValue = function( r, c )
+            {
+                return m_imageData[ r*m_dataWidth + c ];
+            }
+            public.depthValue = function( r )
+            {
+                return m_depthData[ r ];
+            }
+            
+            return public;
+        }());
+        BHIMAGEDATA.initialize();
+
+        var log2dData = new geotoolkit.welllog.data.Log2DVisualData();
+
+        var height = BHIMAGEDATA.dataHeight();
+        var width = BHIMAGEDATA.dataWidth();
+        for (var r = 0; r < height; r++)
+        {
+            //depth is unique
+            var depth = BHIMAGEDATA.depthValue(r);
+            var values = [];
+            var angles = [];
+            for ( var c = 0; c < width; c++)
+            {
+                values[c] = BHIMAGEDATA.imageValue(r, c);
+                angles[c] = c * 1.0 / width * 2 * Math.PI;
+            }
+            //Note that all values are displayed up to their angle.
+            //So only on '0' for values[0], on [0-PI/2] for values[1], etc.
+            log2dData.getRows().push(new geotoolkit.welllog.data.Log2DDataRow(depth, values, angles));
+        }
+
+        log2dData.updateLimits();
+
+        return log2dData;
+    }
+
+    var buildLog2DVisualComponent = function(log2dData, name)
+    {
+        var min = log2dData.getMinValue();
+        var max = log2dData.getMaxValue();
+        var delta = (max - min) / 4;
+
+        //Set options
+        var colors = new geotoolkit.util.DefaultColorProvider({
+            'values' : [ 0, 1 ],
+            'colors' : [ 'black', 'white' ]
+        });
+
+        //Create Visual
+        return new geotoolkit.welllog.Log2DVisual()
+            .setName(name)
+            .setData(log2dData)
+            .setColorProvider(colors)
+            .setOffsets(0)
+            .setMicroPosition(0, 1); //DEFAULT: Visual model limits are from 0,1
     }
 
     // When this module is loaded into html, or other module, this object is returned
