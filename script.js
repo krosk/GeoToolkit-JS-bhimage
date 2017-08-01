@@ -173,12 +173,15 @@ define(["jquery",
         var topLeftY = 30;
         var widgetWidth = 400;
         var widgetHeight = 500;
+        var minDepth = 1000;
+        var maxDepth = 2000;
 
         var widget = new geotoolkit.welllog.widgets.WellLogWidget()
             .setLayoutStyle({'left': '0', 'top': '0', 'right': '0', 'bottom': '0'});
         widget.addTrack(geotoolkit.welllog.widgets.TrackType.IndexTrack);
         widget.addTrack(geotoolkit.welllog.widgets.TrackType.LinearTrack);
         widget.setBounds(new geotoolkit.util.Rect(topLeftX, topLeftY, widgetWidth, widgetHeight));
+        widget.setDepthLimits(minDepth, maxDepth);
 
         return widget;
     }
