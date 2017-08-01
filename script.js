@@ -22,7 +22,9 @@ define(["jquery",
         // populate the plot
         var plot = new geotoolkit.plot.Plot({
             'canvasElement' : canvas,
-            'root' : rootGroup
+            'root' : rootGroup,
+            'autoSize': false,
+            'autoRootBounds': true
         });
 
         var axis = buildAxisExample();
@@ -167,9 +169,16 @@ define(["jquery",
 
     var buildWellLogWidgetExample = function()
     {
+        var topLeftX = 10;
+        var topLeftY = 30;
+        var widgetWidth = 400;
+        var widgetHeight = 500;
+
         var widget = new geotoolkit.welllog.widgets.WellLogWidget()
             .setLayoutStyle({'left': '0', 'top': '0', 'right': '0', 'bottom': '0'});
         widget.addTrack(geotoolkit.welllog.widgets.TrackType.IndexTrack);
+        widget.addTrack(geotoolkit.welllog.widgets.TrackType.LinearTrack);
+        widget.setBounds(new geotoolkit.util.Rect(topLeftX, topLeftY, widgetWidth, widgetHeight));
 
         return widget;
     }
