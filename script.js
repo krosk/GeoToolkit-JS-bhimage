@@ -208,7 +208,7 @@ define(["jquery",
                 {
                     for ( var j = 0; j < m_dataWidth; j++ )
                     {
-                        m_imageData.push( Math.random() );
+                        m_imageData.push( Math.random() * 255 );
                     }
                     m_depthData.push( lastDepth );
                     lastDepth += 1 + Math.random();
@@ -265,12 +265,11 @@ define(["jquery",
     {
         var min = log2dData.getMinValue();
         var max = log2dData.getMaxValue();
-        var delta = (max - min) / 4;
 
         //Set options
         var colors = new geotoolkit.util.DefaultColorProvider({
-            'values' : [ 0, 1 ],
-            'colors' : [ 'black', 'white' ]
+            'values' : [ min, (min + max) / 2, max ],
+            'colors' : [ 'black', 'orange' ,'white' ]
         });
 
         //Create Visual
