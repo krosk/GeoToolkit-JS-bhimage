@@ -13,6 +13,8 @@ define(["jquery",
         // initialization function of the module
         console.log('initialized');
 
+        BHIMAGEDATA.initialize();
+
         // Create a group to hold nodes
         var rootGroup = new geotoolkit.scene.Group();
 
@@ -57,6 +59,48 @@ define(["jquery",
     {
         console.log('doing nothing')
     }
+
+    var BHIMAGEDATA = (function()
+    {
+        var public = {};
+        var m_dataWidth = 36;
+        var m_dataHeight = 1000;
+        var m_depthData = [];
+        var m_imageData = [];
+        
+        public.initialize = function()
+        {
+            var lastDepth = 1000;
+            for ( var i = 0; i < m_dataHeight; i++ )
+            {
+                for ( var j = 0; j < m_dataWidth; j++ )
+                {
+                    m_imageData.push( Math.random() * 255 );
+                }
+                m_depthData.push( lastDepth );
+                lastDepth += 1 + Math.random();
+            }
+        }
+        
+        public.dataWidth = function()
+        {
+            return m_dataWidth;
+        }
+        public.dataHeight = function()
+        {
+            return m_dataHeight;
+        }
+        public.imageValue = function( r, c )
+        {
+            return m_imageData[ r*m_dataWidth + c ];
+        }
+        public.depthValue = function( r )
+        {
+            return m_depthData[ r ];
+        }
+        
+        return public;
+    }());
 
     var buildAxisExample = function()
     {
@@ -188,83 +232,80 @@ define(["jquery",
         widget.setBounds(new geotoolkit.util.Rect(topLeftX, topLeftY, widgetWidth, widgetHeight));
         widget.setDepthLimits(minDepth, maxDepth);
 
+        updateImage(log2DVisual, widget);
+
+        widget.on('visibleDepthLimitsChanged', function ()
+        {
+            updateImage(log2DVisual, widget);
+        });
+        widget.on('updating', function ()
+        {
+            //updateImage(log2DVisual, widget);
+        });
+
         return widget;
+    }
+
+    var updateImage = function(log2DVisual, widget)
+    {
+        var limits = widget.getVisibleDepthLimits();
+        // select all curves in display
+        geotoolkit.selection.from(widget)
+            .where(function (node)
+            {
+                return node instanceof geotoolkit.welllog.Log2DVisual
+            })
+            .execute(function(node)
+            {
+                var log2DVisualData = node.getData();
+                log2DVisualData.clear();
+
+                var depths = [];
+                var angles = [];
+                var values = [];
+
+                var dataHeight = BHIMAGEDATA.dataHeight();
+                var dataWidth = BHIMAGEDATA.dataWidth();
+                for (var r = 0; r < dataHeight; r++)
+                {
+                    var depth = BHIMAGEDATA.depthValue(r);
+                    if(depth < limits.getLow() + 3)
+                    {
+                        continue;
+                    }
+                    if(depth > limits.getHigh() - 3)
+                    {
+                        break;
+                    }
+                    var values = [];
+                    var angles = [];
+                    for ( var c = 0; c < dataWidth; c++)
+                    {
+                        values[c] = BHIMAGEDATA.imageValue(r, c);
+                        angles[c] = c * 1.0 / dataWidth * 2 * Math.PI;
+                    }
+                    log2DVisualData.getRows().push(new geotoolkit.welllog.data.Log2DDataRow(depth, values, angles));
+                }
+
+                log2DVisualData.updateLimits();
+
+                // invalidate visual to refresh it on the screen
+                node.invalidate();
+            });
     }
 
     var buildLog2DVisualData = function()
     {
-        var BHIMAGEDATA = (function()
-        {
-            var public = {};
-            var m_dataWidth = 36;
-            var m_dataHeight = 1000;
-            var m_depthData = [];
-            var m_imageData = [];
-            
-            public.initialize = function()
-            {
-                var lastDepth = 1000;
-                for ( var i = 0; i < m_dataHeight; i++ )
-                {
-                    for ( var j = 0; j < m_dataWidth; j++ )
-                    {
-                        m_imageData.push( Math.random() * 255 );
-                    }
-                    m_depthData.push( lastDepth );
-                    lastDepth += 1 + Math.random();
-                }
-            }
-            
-            public.dataWidth = function()
-            {
-                return m_dataWidth;
-            }
-            public.dataHeight = function()
-            {
-                return m_dataHeight;
-            }
-            public.imageValue = function( r, c )
-            {
-                return m_imageData[ r*m_dataWidth + c ];
-            }
-            public.depthValue = function( r )
-            {
-                return m_depthData[ r ];
-            }
-            
-            return public;
-        }());
-        BHIMAGEDATA.initialize();
-
         var log2dData = new geotoolkit.welllog.data.Log2DVisualData();
-
-        var height = BHIMAGEDATA.dataHeight();
-        var width = BHIMAGEDATA.dataWidth();
-        for (var r = 0; r < height; r++)
-        {
-            //depth is unique
-            var depth = BHIMAGEDATA.depthValue(r);
-            var values = [];
-            var angles = [];
-            for ( var c = 0; c < width; c++)
-            {
-                values[c] = BHIMAGEDATA.imageValue(r, c);
-                angles[c] = c * 1.0 / width * 2 * Math.PI;
-            }
-            //Note that all values are displayed up to their angle.
-            //So only on '0' for values[0], on [0-PI/2] for values[1], etc.
-            log2dData.getRows().push(new geotoolkit.welllog.data.Log2DDataRow(depth, values, angles));
-        }
-
-        log2dData.updateLimits();
-
         return log2dData;
     }
 
     var buildLog2DVisualComponent = function(log2dData, name)
     {
-        var min = log2dData.getMinValue();
-        var max = log2dData.getMaxValue();
+        //var min = log2dData.getMinValue();
+        //var max = log2dData.getMaxValue();
+        var min = 0;
+        var max = 255;
 
         //Set options
         var colors = new geotoolkit.util.DefaultColorProvider({
@@ -277,7 +318,6 @@ define(["jquery",
             .setName(name)
             .setData(log2dData)
             .setColorProvider(colors)
-            .setOffsets(0)
             .setMicroPosition(0, 1); //DEFAULT: Visual model limits are from 0,1
     }
 
