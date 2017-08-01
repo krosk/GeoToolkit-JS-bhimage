@@ -26,7 +26,7 @@ define(["jquery",
         var axis = buildAxisExample();
         var line = buildLineExample();
         var grid = buildGridExample();
-        var track =	buildTrackExample();
+        var trackContainer = buildTrackContainerExample();
 
         var crossHair = buildCrosshairExample(rootGroup);
         var panning = buildPanningExample();
@@ -34,7 +34,7 @@ define(["jquery",
         //rootGroup.addChild(line);
         //rootGroup.addChild(axis);
         //rootGroup.addChild(grid);
-        rootGroup.addChild(track);
+        rootGroup.addChild(trackContainer);
 
         new geotoolkit.controls.tools.ToolsContainer(plot)
             .add(crossHair)
@@ -119,13 +119,47 @@ define(["jquery",
         }
         */
     }
-    
-    var buildTrackExample = function()
+
+    var buildTrackDepth = function()
     {
-        var minDepth =	0;
-        var maxDepth =	550;
-        var trackStart =	30;
-        var trackEnd = 200;
+        var axis = new geotoolkit.welllog.LogAxis()
+            .setName("Depth");
+        return axis;
+    }
+
+    var buildTrackDataExample = function()
+    {
+        var grid = new geotoolkit.axis.Grid(
+            new geotoolkit.axis.AdaptiveTickGenerator()
+                .setVisibleTickGrade("MINOR", true),
+            new geotoolkit.axis.AdaptiveTickGenerator()
+                .setVisibleTickGrade("MINOR", true)
+        );
+
+        var track = new geotoolkit.welllog.LogTrack()
+            .enableClipping(true)
+            .addChild(grid);
+
+        return track;
+    }
+    
+    var buildTrackContainerExample = function()
+    {
+        var minDepth = 0;
+        var maxDepth = 550;
+
+        var depthTrack = buildTrackDepth();
+        var dataTrack = buildTrackDataExample();
+
+        depthTrack.setBounds(new geotoolkit.util.Rect(0, minDepth, 35, maxDepth));
+        dataTrack.setBounds(new geotoolkit.util.Rect(35, minDepth, 135, maxDepth));
+
+        var trackContainer = new geotoolkit.welllog.TrackContainer()
+            .addChild([depthTrack, dataTrack])
+            .setDepthLimits(minDepth, maxDepth);
+        
+        /*
+        
         var bounds = new geotoolkit.util.Rect(trackStart, minDepth, trackEnd, maxDepth);
         var modelLimits = new geotoolkit.util.Rect(0, 0, 60, 55);
         var grid = buildGridExample();
@@ -138,6 +172,8 @@ define(["jquery",
              .addChild(axis)
              .addChild(grid);
         return track;
+        */
+        return trackContainer;
     }
 
     // When this module is loaded into html, or other module, this object is returned
