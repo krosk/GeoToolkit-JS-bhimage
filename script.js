@@ -1,7 +1,12 @@
 // First parameter for define is an array with alias names for dependencies,
 // or actual paths to javascript filed which should be loaded before the
 // body of the module is executed
-define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], function(){
+define(["jquery",
+    "geotoolkit",
+    "geotoolkit.data",
+    "geotoolkit.controls",
+    "geotoolkit.welllog"], function()
+{
     var initialize = function() {
         // initialization function of the module
         console.log('initialized');
@@ -21,13 +26,15 @@ define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], funct
         var axis = buildAxisExample();
         var line = buildLineExample();
         var grid = buildGridExample();
+        var track =	buildTrackExample();
 
         var crossHair = buildCrosshairExample(rootGroup);
         var panning = buildPanningExample();
 
-        rootGroup.addChild(line);
-        rootGroup.addChild(axis);
-        rootGroup.addChild(grid);
+        //rootGroup.addChild(line);
+        //rootGroup.addChild(axis);
+        //rootGroup.addChild(grid);
+        rootGroup.addChild(track);
 
         new geotoolkit.controls.tools.ToolsContainer(plot)
             .add(crossHair)
@@ -48,8 +55,8 @@ define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], funct
     {
         // axis example
         var tickAxis = new geotoolkit.axis.AdaptiveTickGenerator();
-        var boundsAxis = new geotoolkit.util.Rect(10, 0, 50, 400);
-        var modelLimits = new geotoolkit.util.Rect(0, 0, 600, 600);
+        var boundsAxis = new geotoolkit.util.Rect(10, 0, 50, 550);
+        var modelLimits = new geotoolkit.util.Rect(0, 0, 60, 55);
         return new geotoolkit.axis.Axis(tickAxis)
                 .setBounds(boundsAxis)
                 .setModelLimits(modelLimits)
@@ -61,16 +68,15 @@ define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], funct
         // line example
         return new geotoolkit.scene.shapes.Line({
             'from' : new geotoolkit.util.Point(0, 0),
-            'to' : new geotoolkit.util.Point(600, 600),
+            'to' : new geotoolkit.util.Point(400, 400),
             'linestyle' : new geotoolkit.attributes.LineStyle()
         });
     }
 
     var buildGridExample = function()
     {
-        var hTickGrid = new geotoolkit.axis.AdaptiveTickGenerator();
-        var vTickGrid = new geotoolkit.axis.AdaptiveTickGenerator();
-        var boundsGrid = new geotoolkit.util.Rect(0, 0, 600, 600);
+        var hTickGrid = new geotoolkit.axis.AdaptiveTickGenerator().setVisibleTickGrade("MINOR", true);
+        var vTickGrid = new geotoolkit.axis.AdaptiveTickGenerator().setVisibleTickGrade("MINOR", true);
         return new geotoolkit.axis.Grid(hTickGrid, vTickGrid);
     }
 
@@ -112,6 +118,26 @@ define(["jquery", "geotoolkit", "geotoolkit.data", "geotoolkit.controls"], funct
                 );
         }
         */
+    }
+    
+    var buildTrackExample = function()
+    {
+        var minDepth =	0;
+        var maxDepth =	550;
+        var trackStart =	30;
+        var trackEnd = 200;
+        var bounds = new geotoolkit.util.Rect(trackStart, minDepth, trackEnd, maxDepth);
+        var modelLimits = new geotoolkit.util.Rect(0, 0, 60, 55);
+        var grid = buildGridExample();
+        var axis = new geotoolkit.welllog.LogAxis()
+              .setName("Depth");
+        var track = new geotoolkit.welllog.LogTrack()
+             .setBounds(bounds)
+             .setDepthLimits(minDepth, maxDepth)
+             .enableClipping(true)
+             .addChild(axis)
+             .addChild(grid);
+        return track;
     }
 
     // When this module is loaded into html, or other module, this object is returned
